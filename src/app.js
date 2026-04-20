@@ -3,28 +3,23 @@ const express = require("express");
 //creating an new express application
 const app = express();
 
+const { adminAuth,userAuth } = require("./middlewares/auth")
 
-app.get(
-    "/user",
-    (req,res,next)=>{
-    console.log("1 Route ");
-    next();
-},
-    (req,res,next)=>{
-    console.log("2 Route ");
-    // res.send("2 Response");
-    next()
-},
-    (req,res,next)=>{
-    console.log("3 Route ");
-    // res.send("3 Response");
-    next()
-},
-    (req,res,next)=>{
-    console.log("4 Route ");
-    res.send("4 Response");
-}
-)
+//Handle Auth Middleware for all the GET,POST... requests
+app.use("/admin",adminAuth);
+
+app.get("/user",userAuth,(req,res)=>{
+    res.send("user data sent")
+})
+
+app.get("/admin/getAllData",(req,res)=>{
+    //Logic of checking that request is autorized or not
+   res.send("Gets all the Data");
+})
+
+app.get("/admin/deleteUser",(req,res)=>{
+    res.send("user is delted");
+})
 
 //use :- will match all the HTTP methods api call to /test
 app.use("/test",(req,res)=>{
