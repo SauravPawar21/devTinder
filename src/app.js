@@ -6,18 +6,6 @@ const user = require("./models/user");
 
 app.use(express.json());
 
-//get user by email
-app.get("/user",async (req,res)=>{
-  const userEmail = req.body.emailId;
-  try{
-    const user = await User.find({emailId: userEmail})
-    res.send(user);
-  }
-  catch(err){
-    res.status(400).send("something went worng")
-  }
-})
-
 app.post("/signUp", async (req, res) => {
   const user = new User(req.body);
   try {
@@ -27,6 +15,30 @@ app.post("/signUp", async (req, res) => {
     res.status(400).send("error while saving the user:" + err.message);
   }
 });
+
+//get user by email
+app.get("/user",async (req,res)=>{
+  const userEmail = req.body.emailId;
+  console.log(userEmail,"user email is present");
+  try{
+    const user = await User.findOne({emailId: userEmail})
+    res.send(user);
+  }
+  catch(err){
+    res.status(400).send("something went worng")
+  }
+})
+
+//Feed API - GET/feed - get all the users from database
+app.get("/feed",async (req,res)=>{
+  try {
+    const users = await User.find({});//it will fetch the all users data from the database
+    res.send(users);
+  } catch (error) {
+    res.status(400).send("something went worng");
+  }
+})
+
 
 connectDB()
   .then(() => {
