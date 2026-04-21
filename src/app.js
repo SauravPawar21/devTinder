@@ -1,30 +1,32 @@
 const express = require("express");
-
-//creating an new express application
+const connectDB = require("./config/database");
 const app = express();
+const User = require("./models/user");
 
-const { adminAuth,userAuth } = require("./middlewares/auth")
+app.post("/signUp", async (req, res) => {
+  //creating an new instance of the user modle
+  const user = new User({
+    firstName: "virat",
+    lastName: "kohli",
+    emailId: "virat@kohli.com",
+    password: "virat@213",
+  });
+  try {
+     await user.save();
+  res.send("User Added successfully");
+  } catch (err) {
+    res.status(400).send("error while saving the user:" + err.message);
+  }
+ 
+});
 
-//Handle Auth Middleware for all the GET,POST... requests
-app.use("/admin",adminAuth);
-
-app.get("/user",userAuth,(req,res)=>{
-    res.send("user data sent")
-})
-
-app.get("/admin/getAllData",(req,res)=>{
-    //Logic of checking that request is autorized or not
-   res.send("Gets all the Data");
-})
-
-app.get("/admin/deleteUser",(req,res)=>{
-    res.send("user is delted");
-})
-
-//use :- will match all the HTTP methods api call to /test
-app.use("/test",(req,res)=>{
-    res.send("test page!");
-})
-
-
-app.listen(3000);// listen to server on PORT: 3000
+connectDB()
+  .then(() => {
+    console.log("Database connection Established...");
+    app.listen(3000, () => {
+      console.log("Listing to this PORT 3000");
+    });
+  })
+  .catch(() => {
+    console.log("Database cannot be connected!");
+  });
