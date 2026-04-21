@@ -2,26 +2,30 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
+const user = require("./models/user");
 
 app.use(express.json());
 
+//get user by email
+app.get("/user",async (req,res)=>{
+  const userEmail = req.body.emailId;
+  try{
+    const user = await User.find({emailId: userEmail})
+    res.send(user);
+  }
+  catch(err){
+    res.status(400).send("something went worng")
+  }
+})
+
 app.post("/signUp", async (req, res) => {
-  //creating an new instance of the user modle
-  
   const user = new User(req.body);
-//   const user = new User({
-//     firstName: "virat",
-//     lastName: "kohli",
-//     emailId: "virat@kohli.com",
-//     password: "virat@213",
-//   });
   try {
      await user.save();
   res.send("User Added successfully");
   } catch (err) {
     res.status(400).send("error while saving the user:" + err.message);
   }
- 
 });
 
 connectDB()
