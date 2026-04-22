@@ -2,7 +2,6 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const User = require("./models/user");
-const user = require("./models/user");
 
 app.use(express.json());
 
@@ -39,7 +38,30 @@ app.get("/feed",async (req,res)=>{
   }
 })
 
+//delete an user by id
+app.delete("/delete",async (req,res)=>{
+  const userId = req.body.userId;
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    res.send("User is deleted successfully!!!")
+  } catch (error) {
+    res.status(400).send("something went worng");
+  }
+})
 
+//update the user data
+app.patch("/user",async (req,res)=>{
+  const userId=req.body.userId;
+  const data = req.body;
+  try {
+    const userUpdated = await User.findByIdAndUpdate({_id: userId},data,{returnDocument: 'after',runValidators: true,});
+    console.log(userUpdated);
+    
+    res.send("updated user data!!")
+  } catch (error) {
+    res.status(400).send("something went worng!!!")
+  }
+})
 connectDB()
   .then(() => {
     console.log("Database connection Established...");
