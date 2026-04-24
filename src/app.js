@@ -6,6 +6,7 @@ const { validateSignUpData } = require("./utils/validation");
 const bcrypt = require("bcrypt");
 const cookieparser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
+const { userAuth } = require("./middlewares/auth");
 
 app.use(express.json());
 app.use(cookieparser());
@@ -34,23 +35,9 @@ app.post("/signUp", async (req, res) => {
   }
 });
 
-app.get("/profile",async (req,res)=>{
-  try{const cookies= req.cookies;
-  //here we are getting an cookies as undefined for that we have to install the package know as cookie parser.
-  const {token} = cookies;
-  //validate my token
-  if(!token){
-    throw new Error("Invalid Token");
-  }
-  const decodedMessage = await jwt.verify(token,"DEV@Tinder@91");
-
-  const {_id} = decodedMessage;
-  // console.log("Loged in userId:"+ _id);
-  // console.log(cookies); 
-  const user = await User.findById(_id);
-  if(!user){
-    throw new Error("User doesn't exits")
-  }
+app.get("/profile",userAuth, async (req,res)=>{
+  try{
+  const user = req.user;
   res.send(user); 
 }
 catch(err){
@@ -69,14 +56,12 @@ app.post("/login",async(req,res)=>{
       throw new Error("Invalid Credentials");
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await user.validtePassword(password);
 
     if(isPasswordValid){
-      //create an JWT token
-      const token = await jwt.sign({_id: user._id}, "DEV@Tinder@91");
+      const token = await user.getJWT();
       // console.log(token);
-      //add the token to cookie and send the response back
-      res.cookie("token",token);
+      res.cookie("token",token,{expires: new Date(Date.now()+5 *360000)});
       res.send("Login successfully!!");
     }else{
     throw new Error("Invalid Credentials");
