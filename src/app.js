@@ -2,7 +2,14 @@ const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
 const cookieparser = require("cookie-parser");
+const cors = require("cors");
 
+app.use(
+  cors({
+    origin: "http://localhost:5173", //white listing this origin name and it is frontend url path
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieparser());
 
@@ -11,10 +18,10 @@ const profileRouter = require("./routes/profile");
 const requestRouter = require("./routes/requests");
 const userRouter = require("./routes/user");
 
-app.use("/",authRouter);
-app.use("/",profileRouter);
-app.use("/",requestRouter);
-app.use("/",userRouter);
+app.use("/", authRouter);
+app.use("/", profileRouter);
+app.use("/", requestRouter);
+app.use("/", userRouter);
 
 connectDB()
   .then(() => {
