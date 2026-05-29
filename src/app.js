@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const connectDB = require("./config/database");
 const app = express();
@@ -6,7 +7,7 @@ const cors = require("cors");
 
 app.use(
   cors({
-    origin: "http://localhost:5173", //white listing this origin name and it is frontend url path
+    origin: process.env.FRONTEND_URL || "http://localhost:5173",
     credentials: true,
   }),
 );
@@ -23,11 +24,13 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 
+const PORT = process.env.PORT || 3000;
+
 connectDB()
   .then(() => {
     console.log("Database connection Established...");
-    app.listen(3000, () => {
-      console.log("Listing to this PORT 3000");
+    app.listen(PORT, () => {
+      console.log(`Listening on PORT ${PORT}`);
     });
   })
   .catch(() => {

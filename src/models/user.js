@@ -1,96 +1,101 @@
-
 const mongoose = require("mongoose");
 const validator = require("validator");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
-const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: true,
-    minlength: 3,
-    maxLength: 50,
+const userSchema = new mongoose.Schema(
+  {
+    firstName: {
+      type: String,
+      required: true,
+      minlength: 3,
+      maxLength: 50,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      minlength: 3,
+      maxLength: 50,
+    },
+    emailId: {
+      type: String,
+      unique: true,
+      required: true,
+      lowercase: true,
+      validate(value) {
+        if (!validator.isEmail(value)) {
+          throw new Error("Invalid emial address" + value);
+        }
+      },
+    },
+    password: {
+      type: String,
+      required: true,
+      validate(value) {
+        if (!validator.isStrongPassword(value)) {
+          throw new Error("Enter an strong password:" + value);
+        }
+      },
+    },
+    age: {
+      type: Number,
+      min: 18,
+      max: 100,
+    },
+    gender: {
+      type: String,
+      enum: {
+        values: ["male", "female", "other"],
+        message: `{values} are not a valid gender Types.`,
+      },
+      // validate(value){
+      //   if(!["male","female","other"].includes(value)){
+      //     throw new Error("gender is not valid!!")
+      //   }
+      // }
+    },
+    photoUrl: {
+      type: String,
+      default:
+        "https://t4.ftcdn.net/jpg/02/44/43/69/240_F_244436923_vkMe10KKKiw5bjhZeRDT05moxWcPpdmb.jpg",
+      validate(value) {
+        if (!validator.isURL(value)) {
+          throw new Error("Invalid photo URL:" + value);
+        }
+      },
+    },
+    about: {
+      type: String,
+      default: "This is about the default user!!",
+    },
+    skills: {
+      type: [String],
+    },
   },
-  lastName: {
-    type: String,
-    required: true,
-    minlength: 3,
-    maxLength: 50,
+  {
+    timestamps: true,
   },
-  emailId: {
-    type: String,
-    unique: true,
-    required: true,
-    lowercase: true,
-    validate(value){
-      if(!validator.isEmail(value)){
-        throw new Error("Invalid emial address"+value);
-      }
-    }
-  },
-  password: {
-    type: String,
-    required: true,
-     validate(value){
-      if(!validator.isStrongPassword(value)){
-        throw new Error("Enter an strong password:" + value);
-      }
-    }
-  },
-  age: {
-    type: Number,
-    min: 18,
-    max:100,
-  },
-  gender: {
-    type: String,
-    enum: {
-      values: ["male","female","other"],
-      message: `{values} are not a valid gender Types.`
-    }
-    // validate(value){
-    //   if(!["male","female","other"].includes(value)){
-    //     throw new Error("gender is not valid!!")
-    //   }
-    // }
-  },
-  photoUrl: {
-    type: String,
-    default: "https://t4.ftcdn.net/jpg/02/44/43/69/240_F_244436923_vkMe10KKKiw5bjhZeRDT05moxWcPpdmb.jpg",
-    validate(value){
-      if(!validator.isURL(value)){
-        throw new Error("Invalid photo URL:" + value);
-      }
-    }
-  },
-  about: {
-    type: String,
-    default: "This is about the default user!!",
-  },
-  skills: {
-    type: [String],
-  },
-  
-},
-{
-  timestamps: true,
-}
 );
 
-userSchema.index({firstName: 1,lastName: 1})
+userSchema.index({ firstName: 1, lastName: 1 });
 
-userSchema.methods.getJWT= async function(){
+userSchema.methods.getJWT = async function () {
   const user = this;
 
-   const token = await jwt.sign({_id: user._id}, "DEV@Tinder@91",{expiresIn: "1d"});
+  const token = await jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+    expiresIn: "1d",
+  });
 
-   return token;
-}
+  return token;
+};
 
-userSchema.methods.validtePassword= async function(passwordInputByUser){
+userSchema.methods.validtePassword = async function (passwordInputByUser) {
   const user = this;
   const passwordHash = user.password;
-  const isPasswordValid = await bcrypt.compare(passwordInputByUser,passwordHash);
+  const isPasswordValid = await bcrypt.compare(
+    passwordInputByUser,
+    passwordHash,
+  );
   return isPasswordValid;
-}
-module.exports = mongoose.model("User",userSchema);
+};
+module.exports = mongoose.model("User", userSchema);
