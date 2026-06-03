@@ -5,6 +5,7 @@ const app = express();
 const cookieparser = require("cookie-parser");
 const cors = require("cors");
 
+app.use(cookieparser());
 app.use(
   cors({
     origin: process.env.FRONTEND_URL || "http://localhost:5173",
@@ -12,7 +13,6 @@ app.use(
   }),
 );
 app.use(express.json());
-app.use(cookieparser());
 
 const authRouter = require("./routes/auth");
 const profileRouter = require("./routes/profile");
